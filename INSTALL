@@ -19,7 +19,7 @@ Other Alfresco BART dependences are:
 INSTALLATION
 
 1. Create a GPG key for encryption support "gpg --gen-key", recommended.
-2. Copy the files "alfresco-bart.*" to the "scripts" directory inside your Alfresco installation directory or simply use it from anywhere in your file system (anyways I recommend to install it in your Alfresco installation).
+2. Copy the files in src "alfresco-bart.*" to the "scripts" directory inside your Alfresco installation directory or simply use it from anywhere in your file system (anyways I recommend to install it in your Alfresco installation).
 3. Check the executable permissions on "alfresco-bart.sh", it must be executable ("chmod +x alfresco-bart.sh").
 4. Protect permissions for alfresco-bart.properties, it must be set as read only for the user who runs the backup, i.e. to assign read permission only for the owner type "chmod 400 alfresco-bart.properties".
 5. Edit ALFBRT_PATH variable in alfresco-bart.sh, understand and configure all required options in alfresco-bart.properties.
