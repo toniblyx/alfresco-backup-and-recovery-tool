@@ -1,11 +1,12 @@
 Alfresco BART - Backup and Recovery Tool
 ========================================
 Copyright (c) 2013 Toni de la Fuente / blyx.com
-Please read the accompanying license information in Apache 2.0.txt. 
+Please read LICENSE file for information about Apache 2.0.
 
 For install instructions see INSTALL file.
 
-CHANGELOG
+=CHANGELOG=
+
 [Aug/6/13] v0.1 
 	* first release
 
