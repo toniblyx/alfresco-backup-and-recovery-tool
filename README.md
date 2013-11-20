@@ -7,20 +7,20 @@ For install instructions see INSTALL file.
 
 CHANGELOG
 [Aug/6/13] v0.1 
-	- first release
+	* first release
 
 [Nov/5/13] v0.2 
-	- fixed LOCAL_DB_DIR comment
-	- added PGPASSWORD on dump command for Postgresql
-	- added date and time to any DB dump
-	- added logging to db dumps
-	- added backup of full Solr directory except live indexes (like a default installation based on the installer)
-	- added command line option to backup task, now you can invoke directly backup set (index, db, cs or files), if nothing is specified a backup will be done as in the configuration file.
-	- improved command options for restoration
-	- added "--single-transaction" to the mysqldump command
-	- added single file recovery from the contentstore (only mysql installations supported)
-	- added single file or directory recovery from the installation files.
-	- added "--allow-source-mismatch" in a force option if source hostname changes
+	* fixed LOCAL_DB_DIR comment
+	* added PGPASSWORD on dump command for Postgresql
+	* added date and time to any DB dump
+	* added logging to db dumps
+	* added backup of full Solr directory except live indexes (like a default installation based on the installer)
+	* added command line option to backup task, now you can invoke directly backup set (index, db, cs or files), if nothing is specified a backup will be done as in the configuration file.
+	* improved command options for restoration
+	* added "--single-transaction" to the mysqldump command
+	* added single file recovery from the contentstore (only mysql installations supported)
+	* added single file or directory recovery from the installation files.
+	* added "--allow-source-mismatch" in a force option if source hostname changes
 
 RESOURCES
 Most recent information about tool and latest code is available in:
