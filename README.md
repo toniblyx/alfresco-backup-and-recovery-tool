@@ -1,16 +1,17 @@
 Alfresco BART - Backup and Recovery Tool
 ========================================
-Copyright (c) 2013 Toni de la Fuente / blyx.com
+Copyright (c) 2013 Toni de la Fuente blyx.com.
+
 Please read LICENSE file for information about Apache 2.0.
 
 For install instructions see INSTALL file.
 
 ## CHANGELOG
 
-### [Aug/6/13] v0.1 
+#### [Aug/6/13] v0.1 
 	* first release
 
-### [Nov/5/13] v0.2 
+#### [Nov/5/13] v0.2 
 	* fixed LOCAL_DB_DIR comment
 	* added PGPASSWORD on dump command for Postgresql
 	* added date and time to any DB dump
@@ -23,11 +24,9 @@ For install instructions see INSTALL file.
 	* added single file or directory recovery from the installation files.
 	* added "--allow-source-mismatch" in a force option if source hostname changes
 
-## RESOURCES
-Most recent information about tool and latest code is available in:
-http://blyx.com/alfresco-bart
-
-Please report bugs and improvements to: reverse moc.xylb@inot
+## ISSUES
+Please use Github issues for any comment, bug or new features
+https://github.com/toniblyx/alfresco-backup-and-recovery-tool/issues
 
 ## DESCRIPTION
 Alfresco BART is a backup and recovery tool for Alfresco ECM. Is a shell script tool based on Duplicity for Alfresco backups and restore from a local file system, FTP, SCP or Amazon S3 of all its components: indexes, data base, content store and all deployment and configuration files. It should runs in most Linux distributions, for Windows you may use Cygwin (non tested yet).
