@@ -34,6 +34,7 @@ Alfresco BART is a backup and recovery tool for Alfresco ECM. Is a shell script 
 Brief description of its features: full and incremental backups, backup policies, backup volume control, encryption with GPG, compression. Also it has a restore wizard with shortcuts for quick restore of some key components (alfresco-global.properties and more).
 
 ## FEATURES
+Full list of the first version here http://blyx.com/2013/08/07/alfresco-backup-and-recovery-tool-release-v0-1/
 
 ### Features in this version (v0.2):
 see CHANGELOG
