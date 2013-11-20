@@ -1,0 +1,45 @@
+REQUIREMENTS
+
+For description and changelog see README file.
+
+Alfresco BART needs Duplicity (Python backup tool). Install it or Alfresco BART won't work. Most Linux distributions have readymade Duplicity packages available. If you encounter errors using the distro's duplicity please double check if the version is outdated on http://duplicity.nongnu.org.
+
+Please try using the latest stable Duplicity version (0.6.21) from the Duplicity website before filing bug reports. If you install Duplicity from the website's tarball check next "Requirements" before:
+-Python v2.4 or later
+-librsync v0.9.6 or later
+-GnuPG for encryption
+-NcFTP version 3.1.9 or later
+-Boto 1.6a or later
+ 
+Other Alfresco BART dependences are:
+-mysqldump for MySQL backup
+-pg_dump for PostgreSQL backup
+-imp for Oracle backup
+
+INSTALLATION
+
+1. Create a GPG key for encryption support "gpg --gen-key", recommended.
+2. Copy the files "alfresco-bart.*" to the "scripts" directory inside your Alfresco installation directory or simply use it from anywhere in your file system (anyways I recommend to install it in your Alfresco installation).
+3. Check the executable permissions on "alfresco-bart.sh", it must be executable ("chmod +x alfresco-bart.sh").
+4. Protect permissions for alfresco-bart.properties, it must be set as read only for the user who runs the backup, i.e. to assign read permission only for the owner type "chmod 400 alfresco-bart.properties".
+5. Edit ALFBRT_PATH variable in alfresco-bart.sh, understand and configure all required options in alfresco-bart.properties.
+6. Run "./alfresco-bart.sh" to get usage help
+7. Add "0 5 * * * /path/to/alfresco-bart.sh backup" to the appropriate crontab if you want to run your backup daily at 5AM (after Alfresco's nightly backups and maintenance jobs). First time you run "alfresco-bart.sh backup" it will do a full backup then incremental backups as you configure in alfresco-bart.properties.
+
+USAGE
+
+./alfresco-bart.sh <mode> [set] [date <dest>]
+
+Modes:
+    backup [set]	runs an incremental backup or a full if first time
+    restore [set] [date] [dest]	runs the restore, wizard if no arguments
+    verify [set]	verifies the backup
+    collection [set]	shows all the backup sets in the archive
+    list [set]		lists the files currently backed up in the archive
+
+Sets:
+    <no value> use all backup sets
+    index	use index backup set (group) for selected mode
+    db		use data base backup set (group) for selected mode
+    cs		use content store backup set (group) for selected mode
+    files	use rest of files backup set (group) for selected mode"

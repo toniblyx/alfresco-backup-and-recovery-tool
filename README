@@ -120,4 +120,9 @@ HOW TO RESTORE YOUR BACKUP IN A DIFFERENT SEVER
 
 HOSTNAME CHANGES ERROR
 Fatal Error: Backup source host has changed. (added --allow-source-mismatch)
-Run once: ./alfresco-bart.sh backup all force
+Run once: ./alfresco-bart.sh backup all force 
+
+
+
+
+
