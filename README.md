@@ -36,6 +36,9 @@ Brief description of its features: full and incremental backups, backup policies
 ## FEATURES
 Full list of the first version here http://blyx.com/2013/08/07/alfresco-backup-and-recovery-tool-release-v0-1/
 
+## USAGE
+See samples here: http://blyx.com/2013/12/11/essential-commands-for-alfresco-bart/
+
 ### Features in this version (v0.2):
 see CHANGELOG
 
