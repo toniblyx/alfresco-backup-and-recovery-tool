@@ -77,6 +77,8 @@ fi
 # Checks backup type, target selected
 case $BACKUPTYPE in
 	"s3" ) 
+	        export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
+                export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
 		DEST=${S3FILESYSLOCATION}
 		PARAMS="${GLOBAL_DUPLICITY_PARMS} ${S3OPTIONS} ${NOENCFLAG}"
 		;;
