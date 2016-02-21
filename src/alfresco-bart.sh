@@ -32,7 +32,11 @@
 #########################################################################################
 
 # Load properties
-ALFBRT_PATH=/opt/alfresco/scripts
+if [ -n "$ALFBRT_PATH" ]; then
+  ALFBRT_PATH="$ALFBRT_PATH"
+else
+  ALFBRT_PATH="/opt/alfresco/scripts"
+fi
 
 if [ -f ${ALFBRT_PATH}/alfresco-bart.properties ]; then
 	. ${ALFBRT_PATH}/alfresco-bart.properties 
