@@ -289,11 +289,11 @@ function restoreIndexes (){
 	if [ ${BACKUP_INDEX_ENABLED} == 'true' ]; then
 		echo " =========== Starting restore INDEXES from $DEST/$INDEXTYPE to $RESTOREDIR/$INDEXTYPE ==========="
 		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/$INDEXTYPE/backup $RESTOREDIR/$INDEXTYPE/backup" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTORE_TIME $DEST/$INDEXTYPE/backup $RESTOREDIR/$INDEXTYPE/backup
+		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/$INDEXTYPE/backup $RESTOREDIR/$INDEXTYPE/backup
 		
 		if [ ${INDEXTYPE} == 'solr' ]; then
 			echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/$INDEXTYPE/config $RESTOREDIR/$INDEXTYPE/config" >> $ALFBRT_LOG_FILE
-			$DUPLICITYBIN restore --restore-time $RESTORE_TIME $DEST/$INDEXTYPE/config $RESTOREDIR/$INDEXTYPE/config	
+			$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/$INDEXTYPE/config $RESTOREDIR/$INDEXTYPE/config	
 		fi
 		echo ""
 		echo "INDEXES from $DEST/$INDEXTYPE... DONE!"
@@ -306,7 +306,7 @@ function restoreDb (){
 	if [ ${BACKUP_DB_ENABLED} == 'true' ]; then
 		echo " =========== Starting restore DB from $DEST/$DBTYPE to $RESTOREDIR/$DBTYPE==========="
 		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/$DBTYPE $RESTOREDIR/$DBTYPE" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTORE_TIME $DEST/$DBTYPE $RESTOREDIR/$DBTYPE
+		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/$DBTYPE $RESTOREDIR/$DBTYPE
 		if [ ${DBTYPE} == 'mysql' ]; then
 			mv $RESTOREDIR/$DBTYPE/$DBNAME.dump $RESTOREDIR/$DBTYPE/$DBNAME.dump.gz
 			echo ""
@@ -333,7 +333,7 @@ function restoreContentStore (){
 	if [ ${BACKUP_CONTENTSTORE_ENABLED} == 'true' ]; then
 		echo " =========== Starting restore CONTENT STORE from $DEST/cs to $RESTOREDIR/cs ==========="
 		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/cs $RESTOREDIR/cs" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTORE_TIME $DEST/cs $RESTOREDIR/cs
+		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/cs $RESTOREDIR/cs
 		echo ""
 		echo "CONTENT STORE from $DEST/cs... DONE!"
 		echo ""
@@ -347,7 +347,7 @@ function restoreFiles (){
 	if [ ${BACKUP_FILES_ENABLED} == 'true' ]; then
 		echo " =========== Starting restore FILES from $DEST/files to $RESTOREDIR/files ==========="
 		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/files $RESTOREDIR/files" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTORE_TIME $DEST/files $RESTOREDIR/files
+		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/files $RESTOREDIR/files
 		echo ""
 		echo "FILES from $DEST/files... DONE!"
 		echo ""
