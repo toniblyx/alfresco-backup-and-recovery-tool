@@ -231,34 +231,34 @@ function filesBackup {
 	FILES_DIR_INCLUDES="$ALF_INSTALLATION_DIR"
 	
 	if [ -d "$INDEXES_BACKUP_DIR" ]; then
-		OPT_INDEXES_BACKUP_DIR=" --exclude $INDEXES_BACKUP_DIR"
+		OPT_INDEXES_BACKUP_DIR=" --exclude **$INDEXES_BACKUP_DIR**"
 	fi
 	if [ -d "$INDEXES_DIR" ]; then
-		OPT_INDEXES_DIR=" --exclude $INDEXES_DIR"
+		OPT_INDEXES_DIR=" --exclude **$INDEXES_DIR**"
 	fi
 	if [ -d "$ALF_CONTENTSTORE" ]; then
-		OPT_ALF_CONTENTSTORE=" --exclude $ALF_CONTENTSTORE"
+		OPT_ALF_CONTENTSTORE=" --exclude **$ALF_CONTENTSTORE**"
 	fi
 	if [ -d ${ALF_DIRROOT}/contentstore.deleted ]; then
-		OPT_ALF_CONTENSTORE_DELETED=" --exclude ${ALF_DIRROOT}/contentstore.deleted"
+		OPT_ALF_CONTENSTORE_DELETED=" --exclude **${ALF_DIRROOT}/contentstore.deleted**"
 	fi
 	if [ -d "$ALF_CACHED_CONTENTSTORE" ]; then
-		OPT_CACHED_CONTENTSTORE=" --exclude $CACHED_CONTENTSTORE"
+		OPT_CACHED_CONTENTSTORE=" --exclude **$CACHED_CONTENTSTORE**"
 	fi
 	if [ -d "$ALF_CONTENTSTORE2" ]; then
-		OPT_ALF_CONTENTSTORE2=" --exclude $ALF_CONTENTSTORE2"
+		OPT_ALF_CONTENTSTORE2=" --exclude **$ALF_CONTENTSTORE2**"
 	fi
 	if [ -d "$ALF_CONTENTSTORE3" ]; then
-		OPT_ALF_CONTENTSTORE3=" --exclude $ALF_CONTENTSTORE3"
+		OPT_ALF_CONTENTSTORE3=" --exclude **$ALF_CONTENTSTORE3**"
 	fi
 	if [ -d "$ALF_CONTENTSTORE4" ]; then
-		OPT_ALF_CONTENTSTORE4=" --exclude $ALF_CONTENTSTORE4"
+		OPT_ALF_CONTENTSTORE4=" --exclude **$ALF_CONTENTSTORE4**"
 	fi
 	if [ -d "$ALF_CONTENTSTORE5" ]; then
-		OPT_ALF_CONTENTSTORE5=" --exclude $ALF_CONTENTSTORE5"
+		OPT_ALF_CONTENTSTORE5=" --exclude **$ALF_CONTENTSTORE5**"
 	fi
 	if [ -d "$LOCAL_BACKUP_DB_DIR" ]; then
-		OPT_LOCAL_BACKUP_DB_DIR=" --exclude $LOCAL_BACKUP_DB_DIR"
+		OPT_LOCAL_BACKUP_DB_DIR=" --exclude **$LOCAL_BACKUP_DB_DIR**"
 	fi
 	
   	echo "$LOG_DATE_LOG - $BART_LOG_TAG Backing up the Alfresco files to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
