@@ -243,7 +243,7 @@ function filesBackup {
 		OPT_ALF_CONTENSTORE_DELETED=" --exclude **${ALF_DIRROOT}/contentstore.deleted**"
 	fi
 	if [ -d "$ALF_CACHED_CONTENTSTORE" ]; then
-		OPT_CACHED_CONTENTSTORE=" --exclude **$CACHED_CONTENTSTORE**"
+		OPT_CACHED_CONTENTSTORE=" --exclude **$ALF_CACHED_CONTENTSTORE**"
 	fi
 	if [ -d "$ALF_CONTENTSTORE2" ]; then
 		OPT_ALF_CONTENTSTORE2=" --exclude **$ALF_CONTENTSTORE2**"
