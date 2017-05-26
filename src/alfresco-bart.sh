@@ -240,7 +240,7 @@ function filesBackup {
 		OPT_ALF_CONTENSTORE_DELETED=" --exclude **${ALF_DIRROOT}/contentstore.deleted**"
 	fi
 	if [ -d "$ALF_CACHED_CONTENTSTORE" ]; then
-		OPT_CACHED_CONTENTSTORE=" --exclude **$CACHED_CONTENTSTORE**"
+		OPT_CACHED_CONTENTSTORE=" --exclude **$ALF_CACHED_CONTENTSTORE**"
 	fi
 	if [ -d "$ALF_CONTENTSTORE2" ]; then
 		OPT_ALF_CONTENTSTORE2=" --exclude **$ALF_CONTENTSTORE2**"
@@ -544,7 +544,7 @@ function restoreWizard(){
     		read CONFIRMRESTORE
 			read -p " To start restoring your selected backup press ENTER or CTRL+C to exit"
 			echo ""
-			$DUPLICITYBIN restore --restore-time $RESTOREDATE --file-to-restore tomcat/shared/classes/alfresco-global.properties $DEST/files $RESTOREDIR/alfresco-global.properties
+			$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore tomcat/shared/classes/alfresco-global.properties $DEST/files $RESTOREDIR/alfresco-global.properties
 		
 		;;
 
@@ -581,7 +581,7 @@ function restoreWizard(){
     		read CONFIRMRESTORE
 			read -p " To start restoring your selected backup press ENTER or CTRL+C to exit"
 			echo ""
-			$DUPLICITYBIN restore --restore-time $RESTOREDATE --file-to-restore $FILE_TO_RESTORE_PATH $DEST/files $RESTOREDIR/$FILE_TO_RESTORE
+			$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $FILE_TO_RESTORE_PATH $DEST/files $RESTOREDIR/$FILE_TO_RESTORE
 		;;
   		q ) 
   			exit 0
@@ -593,8 +593,8 @@ function restoreWizard(){
 }			
 	
 function restoreMysqlAtPointInTime (){
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE --file-to-restore $DBNAME.dump $DEST/db /tmp/$DBNAME.dump.gz" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTOREDATE --file-to-restore $DBNAME.dump $DEST/db /tmp/$DBNAME.dump.gz
+		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $DBNAME.dump $DEST/db /tmp/$DBNAME.dump.gz" >> $ALFBRT_LOG_FILE
+		$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $DBNAME.dump $DEST/db /tmp/$DBNAME.dump.gz
 		$GZIP -d /tmp/$DBNAME.dump.gz
 		## TODO: Clean DB if its already populated
 		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Command: $REC_MYSQL_BIN -h $REC_MYHOST -u $REC_MYUSER -p$REC_MYPASS $REC_MYDBNAME < /tmp/$DBNAME.dump" >> $ALFBRT_LOG_FILE
@@ -626,8 +626,8 @@ function searchNodeUrlInMysql (){
 }
 
 function restoreSelectedNode (){
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE --file-to-restore $NODE_URL $DEST/db /tmp/$NODE_FILE_NAME" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTOREDATE --file-to-restore $NODE_URL $DEST/cs /tmp/$NODE_FILE_NAME
+		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $NODE_URL $DEST/db /tmp/$NODE_FILE_NAME" >> $ALFBRT_LOG_FILE
+		$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $NODE_URL $DEST/cs /tmp/$NODE_FILE_NAME
 		echo ""
 		echo "Whooooohooooo!!"
 		echo ""
