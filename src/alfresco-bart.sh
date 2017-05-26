@@ -321,7 +321,7 @@ function restoreDb (){
 			echo "DB from $DEST/db... DONE!"
 			echo ""
 			echo "To restore this PostgreSQL database use next command (the existing db must be empty)"
-			echo "$PGSQL_BINDIR/pg_restore -h $DBHOST -U $DBUSER -d $DBNAME $DBNAME.sql.Fc"
+			echo "$PGSQL_BINDIR/$PGSQLRESTORE_BIN -h $DBHOST -U $DBUSER -d $DBNAME $DBNAME.sql.Fc"
 		fi
 	else
 		echo "No backup DB configured to backup. Nothing to restore."
