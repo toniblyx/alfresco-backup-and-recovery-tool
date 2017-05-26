@@ -157,15 +157,12 @@ function dbBackup {
 			echo "$LOG_DATE_LOG - $BART_LOG_TAG Backing up the Alfresco DB to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
   			echo "$LOG_DATE_LOG - $BART_LOG_TAG Starting backup - Alfresco $DBTYPE DB" >> $ALFBRT_LOG_FILE
 			# PG dump in plain text format and compressed 
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $PGSQL_BINDIR/$PGSQLDUMP_BIN --host=$DBHOST --username=$DBUSER --format=p --compress=9 --file=$LOCAL_BACKUP_DB_DIR/$DBNAME.dump $DBNAME -w" >> $ALFBRT_LOG_FILE
+			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $PGSQL_BINDIR/$PGSQLDUMP_BIN -Fc -w -h $DBHOST -U $DBUSER $DBNAME > $LOCAL_BACKUP_DB_DIR/$DBNAME.sql.Fc" >> $ALFBRT_LOG_FILE
 			export PGPASSFILE=$PGPASSFILE
 			export PGPASSWORD=$DBPASS
-			$PGSQL_BINDIR/$PGSQLDUMP_BIN --host=$DBHOST --username=$DBUSER --format=p --compress=9 --file=$LOCAL_BACKUP_DB_DIR/$DBNAME.dump $DBNAME -w
+			$PGSQL_BINDIR/$PGSQLDUMP_BIN -Fc -w -h $DBHOST -U $DBUSER $DBNAME > $LOCAL_BACKUP_DB_DIR/$DBNAME.sql.Fc
 			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db" >> $ALFBRT_LOG_FILE
   			$DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db >> $ALFBRT_LOG_FILE
-  			echo "$LOG_DATE_LOG - $BART_LOG_TAG cleaning DB backup" >> $ALFBRT_LOG_FILE
-  			rm -fr $LOCAL_BACKUP_DB_DIR/$DBNAME.dump
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG DB backup finished" >> $ALFBRT_LOG_FILE
 		;; 
 		
 		"oracle" ) 
@@ -308,24 +305,23 @@ function restoreIndexes (){
 function restoreDb (){
 	restoreOptions $1 $2 $3 $4
 	if [ ${BACKUP_DB_ENABLED} == 'true' ]; then
-		echo " =========== Starting restore DB from $DEST/db to $RESTOREDIR/$DBTYPE==========="
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/db $RESTOREDIR/$DBTYPE" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/db $RESTOREDIR/$DBTYPE
+		echo " =========== Starting restore DB from $DEST/db to $RESTOREDIR/db==========="
+		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/db $RESTOREDIR/db" >> $ALFBRT_LOG_FILE
+		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/db $RESTOREDIR/db
 		if [ ${DBTYPE} == 'mysql' ]; then
-			mv $RESTOREDIR/$DBTYPE/$DBNAME.dump $RESTOREDIR/$DBTYPE/$DBNAME.dump.gz
+			mv $RESTOREDIR/db/$DBNAME.dump $RESTOREDIR/db/$DBNAME.dump.gz
 			echo ""
 			echo "DB from $DEST/db... DONE!"
 			echo ""
 			echo "To restore this MySQL database use next command (the existing db must be empty)"
-			echo "gunzip < $RESTOREDIR/$DBTYPE/$DBNAME.dump.gz | $MYSQL_BINDIR/mysql -u $DBUSER -p$DBPASS $DBNAME"
+			echo "gunzip < $RESTOREDIR/db/$DBNAME.dump.gz | $MYSQL_BINDIR/mysql -u $DBUSER -p$DBPASS $DBNAME"
 		fi
 		if [ ${DBTYPE} == 'postgresql' ]; then
-			mv $RESTOREDIR/$DBTYPE/$DBNAME.dump $RESTOREDIR/$DBTYPE/$DBNAME.dump.gz
 			echo ""
 			echo "DB from $DEST/db... DONE!"
 			echo ""
 			echo "To restore this PostgreSQL database use next command (the existing db must be empty)"
-			echo "$PGSQL_BINDIR/psql --host=$DBHOST -U $DBUSER -d $DBNAME -f $DBNAME.dump.gz"
+			echo "$PGSQL_BINDIR/pg_restore -h $DBHOST -U $DBUSER -d $DBNAME $DBNAME.sql.Fc"
 		fi
 	else
 		echo "No backup DB configured to backup. Nothing to restore."
@@ -776,26 +772,10 @@ function maintenanceCommands () {
 	fi
 	
 	if [ ${BACKUP_DB_ENABLED} == 'true' ]; then
-	case $DBTYPE in 
-		"mysql" ) 
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/db" >> $ALFBRT_LOG_FILE
-			$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/db >> $ALFBRT_LOG_FILE
-  			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/db" >> $ALFBRT_LOG_FILE 2>&1
-  			$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/db >> $ALFBRT_LOG_FILE
-		;; 
-		"postgresql" )
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/db" >> $ALFBRT_LOG_FILE
-			$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/db >> $ALFBRT_LOG_FILE
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/db" >> $ALFBRT_LOG_FILE 2>&1
-			$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/db >> $ALFBRT_LOG_FILE		
-		;; 		
-		"oracle" )
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/db" >> $ALFBRT_LOG_FILE
-  			$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/db >> $ALFBRT_LOG_FILE
-  			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/db" >> $ALFBRT_LOG_FILE 2>&1
-  			$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/db >> $ALFBRT_LOG_FILE
-		;;	
-	esac
+		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/db" >> $ALFBRT_LOG_FILE
+		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/db >> $ALFBRT_LOG_FILE
+		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/db" >> $ALFBRT_LOG_FILE 2>&1
+		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/db >> $ALFBRT_LOG_FILE
 	fi
 
 	if [ ${BACKUP_CONTENTSTORE_ENABLED} == 'true' ]; then
