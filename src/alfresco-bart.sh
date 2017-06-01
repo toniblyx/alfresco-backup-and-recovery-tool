@@ -118,10 +118,10 @@ function indexBackup {
   	echo "$LOG_DATE_LOG - $BART_LOG_TAG Starting backup - Alfresco $INDEXTYPE indexes" >> $ALFBRT_LOG_FILE
   	# Command for indexes backup
 	echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $INDEXES_BACKUP_DIR $DEST/$INDEXTYPE" >> $ALFBRT_LOG_FILE
-  	$DUPLICITYBIN $PARAMS $INDEXES_BACKUP_DIR $DEST/$INDEXTYPE/backup >> $ALFBRT_LOG_FILE
+  	$DUPLICITYBIN $PARAMS $INDEXES_BACKUP_DIR $DEST/index/backup >> $ALFBRT_LOG_FILE
   	if [ ${INDEXTYPE} == 'solr' ]; then
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $INDEXES_DIR --exclude $INDEXES_DIR/archive --exclude $INDEXES_DIR/workspace $DEST/$INDEXTYPE/config" >> $ALFBRT_LOG_FILE
-  		$DUPLICITYBIN $PARAMS $INDEXES_DIR --exclude $INDEXES_DIR/archive --exclude $INDEXES_DIR/workspace $DEST/$INDEXTYPE/config >> $ALFBRT_LOG_FILE
+		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $INDEXES_DIR --exclude $INDEXES_DIR/archive --exclude $INDEXES_DIR/workspace $DEST/index/config" >> $ALFBRT_LOG_FILE
+  		$DUPLICITYBIN $PARAMS $INDEXES_DIR --exclude $INDEXES_DIR/archive --exclude $INDEXES_DIR/workspace $DEST/index/config >> $ALFBRT_LOG_FILE
 	fi
 	echo "$LOG_DATE_LOG - $BART_LOG_TAG Indexes backup finished" >> $ALFBRT_LOG_FILE
 }
@@ -146,8 +146,8 @@ function dbBackup {
 			# Mysql dump
 			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $MYSQL_BINDIR/$MYSQLDUMP_BIN --single-transaction  -u $DBUSER -h $DBHOST -p$DBPASS $DBNAME | $GZIP -9 > $LOCAL_BACKUP_DB_DIR/$DBNAME.dump" >> $ALFBRT_LOG_FILE
 			$MYSQL_BINDIR/$MYSQLDUMP_BIN --single-transaction -u $DBUSER -h $DBHOST -p$DBPASS $DBNAME | $GZIP -9 > $LOCAL_BACKUP_DB_DIR/$DBNAME.dump
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/$DBTYPE" >> $ALFBRT_LOG_FILE
-  			$DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/$DBTYPE >> $ALFBRT_LOG_FILE
+			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db" >> $ALFBRT_LOG_FILE
+  			$DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db >> $ALFBRT_LOG_FILE
   			echo "$LOG_DATE_LOG - $BART_LOG_TAG cleaning DB backup" >> $ALFBRT_LOG_FILE
   			rm -fr $LOCAL_BACKUP_DB_DIR/$DBNAME.dump
 			echo "$LOG_DATE_LOG - $BART_LOG_TAG DB backup finished" >> $ALFBRT_LOG_FILE
@@ -157,15 +157,12 @@ function dbBackup {
 			echo "$LOG_DATE_LOG - $BART_LOG_TAG Backing up the Alfresco DB to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
   			echo "$LOG_DATE_LOG - $BART_LOG_TAG Starting backup - Alfresco $DBTYPE DB" >> $ALFBRT_LOG_FILE
 			# PG dump in plain text format and compressed 
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $PGSQL_BINDIR/$PGSQLDUMP_BIN --host=$DBHOST --username=$DBUSER --format=p --compress=9 --file=$LOCAL_BACKUP_DB_DIR/$DBNAME.dump $DBNAME -w" >> $ALFBRT_LOG_FILE
+			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $PGSQL_BINDIR/$PGSQLDUMP_BIN -Fc -w -h $DBHOST -U $DBUSER $DBNAME > $LOCAL_BACKUP_DB_DIR/$DBNAME.sql.Fc" >> $ALFBRT_LOG_FILE
 			export PGPASSFILE=$PGPASSFILE
 			export PGPASSWORD=$DBPASS
-			$PGSQL_BINDIR/$PGSQLDUMP_BIN --host=$DBHOST --username=$DBUSER --format=p --compress=9 --file=$LOCAL_BACKUP_DB_DIR/$DBNAME.dump $DBNAME -w
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/$DBTYPE" >> $ALFBRT_LOG_FILE
-  			$DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/$DBTYPE >> $ALFBRT_LOG_FILE
-  			echo "$LOG_DATE_LOG - $BART_LOG_TAG cleaning DB backup" >> $ALFBRT_LOG_FILE
-  			rm -fr $LOCAL_BACKUP_DB_DIR/$DBNAME.dump
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG DB backup finished" >> $ALFBRT_LOG_FILE
+			$PGSQL_BINDIR/$PGSQLDUMP_BIN -Fc -w -h $DBHOST -U $DBUSER $DBNAME > $LOCAL_BACKUP_DB_DIR/$DBNAME.sql.Fc
+			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db" >> $ALFBRT_LOG_FILE
+  			$DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db >> $ALFBRT_LOG_FILE
 		;; 
 		
 		"oracle" ) 
@@ -175,8 +172,8 @@ function dbBackup {
 			# TODO: Change full options
 			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $ORACLE_BINDIR/$ORASQLDUMP_BIN $DBUSER/$DBPASS@$DBHOST/$DBNAME full=y file=$LOCAL_BACKUP_DB_DIR/$DBNAME.dump log=$ALFBRT_LOG_FILE" >> $ALFBRT_LOG_FILE
 			$ORACLE_BINDIR/$ORASQLDUMP_BIN $DBUSER/$DBPASS@$DBHOST/$DBNAME full=y file=$LOCAL_BACKUP_DB_DIR/$DBNAME.dump log=$ALFBRT_LOG_FILE
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/$DBTYPE" >> $ALFBRT_LOG_FILE
-  			$DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/$DBTYPE >> $ALFBRT_LOG_FILE
+			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db" >> $ALFBRT_LOG_FILE
+  			$DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db >> $ALFBRT_LOG_FILE
   			echo "$LOG_DATE_LOG - $BART_LOG_TAG cleaning DB backup" >> $ALFBRT_LOG_FILE
   			rm -fr $LOCAL_BACKUP_DB_DIR/$DBNAME.dump
 			echo "$LOG_DATE_LOG - $BART_LOG_TAG DB backup finished" >> $ALFBRT_LOG_FILE
@@ -291,16 +288,16 @@ function restoreOptions (){
 function restoreIndexes (){
 	restoreOptions $1 $2 $3 $4
 	if [ ${BACKUP_INDEX_ENABLED} == 'true' ]; then
-		echo " =========== Starting restore INDEXES from $DEST/$INDEXTYPE to $RESTOREDIR/$INDEXTYPE ==========="
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/$INDEXTYPE/backup $RESTOREDIR/$INDEXTYPE/backup" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/$INDEXTYPE/backup $RESTOREDIR/$INDEXTYPE/backup
+		echo " =========== Starting restore INDEXES from $DEST/index to $RESTOREDIR/$INDEXTYPE ==========="
+		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/index/backup $RESTOREDIR/$INDEXTYPE/backup" >> $ALFBRT_LOG_FILE
+		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/index/backup $RESTOREDIR/$INDEXTYPE/backup
 		
 		if [ ${INDEXTYPE} == 'solr' ]; then
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/$INDEXTYPE/config $RESTOREDIR/$INDEXTYPE/config" >> $ALFBRT_LOG_FILE
-			$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/$INDEXTYPE/config $RESTOREDIR/$INDEXTYPE/config	
+			echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/index/config $RESTOREDIR/$INDEXTYPE/config" >> $ALFBRT_LOG_FILE
+			$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/index/config $RESTOREDIR/$INDEXTYPE/config	
 		fi
 		echo ""
-		echo "INDEXES from $DEST/$INDEXTYPE... DONE!"
+		echo "INDEXES from $DEST/index... DONE!"
 		echo ""
 	fi
 }
@@ -308,24 +305,23 @@ function restoreIndexes (){
 function restoreDb (){
 	restoreOptions $1 $2 $3 $4
 	if [ ${BACKUP_DB_ENABLED} == 'true' ]; then
-		echo " =========== Starting restore DB from $DEST/$DBTYPE to $RESTOREDIR/$DBTYPE==========="
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/$DBTYPE $RESTOREDIR/$DBTYPE" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/$DBTYPE $RESTOREDIR/$DBTYPE
+		echo " =========== Starting restore DB from $DEST/db to $RESTOREDIR/db==========="
+		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/db $RESTOREDIR/db" >> $ALFBRT_LOG_FILE
+		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/db $RESTOREDIR/db
 		if [ ${DBTYPE} == 'mysql' ]; then
-			mv $RESTOREDIR/$DBTYPE/$DBNAME.dump $RESTOREDIR/$DBTYPE/$DBNAME.dump.gz
+			mv $RESTOREDIR/db/$DBNAME.dump $RESTOREDIR/db/$DBNAME.dump.gz
 			echo ""
-			echo "DB from $DEST/$DBTYPE... DONE!"
+			echo "DB from $DEST/db... DONE!"
 			echo ""
 			echo "To restore this MySQL database use next command (the existing db must be empty)"
-			echo "gunzip < $RESTOREDIR/$DBTYPE/$DBNAME.dump.gz | $MYSQL_BINDIR/mysql -u $DBUSER -p$DBPASS $DBNAME"
+			echo "gunzip < $RESTOREDIR/db/$DBNAME.dump.gz | $MYSQL_BINDIR/mysql -u $DBUSER -p$DBPASS $DBNAME"
 		fi
 		if [ ${DBTYPE} == 'postgresql' ]; then
-			mv $RESTOREDIR/$DBTYPE/$DBNAME.dump $RESTOREDIR/$DBTYPE/$DBNAME.dump.gz
 			echo ""
-			echo "DB from $DEST/$DBTYPE... DONE!"
+			echo "DB from $DEST/db... DONE!"
 			echo ""
 			echo "To restore this PostgreSQL database use next command (the existing db must be empty)"
-			echo "$PGSQL_BINDIR/psql --host=$DBHOST -U $DBUSER -d $DBNAME -f $DBNAME.dump.gz"
+			echo "$PGSQL_BINDIR/$PGSQLRESTORE_BIN -h $DBHOST -U $DBUSER -d $DBNAME $DBNAME.sql.Fc"
 		fi
 	else
 		echo "No backup DB configured to backup. Nothing to restore."
@@ -597,8 +593,8 @@ function restoreWizard(){
 }			
 	
 function restoreMysqlAtPointInTime (){
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $DBNAME.dump $DEST/$DBTYPE /tmp/$DBNAME.dump.gz" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $DBNAME.dump $DEST/$DBTYPE /tmp/$DBNAME.dump.gz
+		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $DBNAME.dump $DEST/db /tmp/$DBNAME.dump.gz" >> $ALFBRT_LOG_FILE
+		$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $DBNAME.dump $DEST/db /tmp/$DBNAME.dump.gz
 		$GZIP -d /tmp/$DBNAME.dump.gz
 		## TODO: Clean DB if its already populated
 		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Command: $REC_MYSQL_BIN -h $REC_MYHOST -u $REC_MYUSER -p$REC_MYPASS $REC_MYDBNAME < /tmp/$DBNAME.dump" >> $ALFBRT_LOG_FILE
@@ -630,7 +626,7 @@ function searchNodeUrlInMysql (){
 }
 
 function restoreSelectedNode (){
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $NODE_URL $DEST/$DBTYPE /tmp/$NODE_FILE_NAME" >> $ALFBRT_LOG_FILE
+		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $NODE_URL $DEST/db /tmp/$NODE_FILE_NAME" >> $ALFBRT_LOG_FILE
 		$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $NODE_URL $DEST/cs /tmp/$NODE_FILE_NAME
 		echo ""
 		echo "Whooooohooooo!!"
@@ -645,15 +641,15 @@ function verifyCommands (){
 		case $2 in
 			"index" )	
 				echo "=========================== BACKUP VERIFICATION FOR INDEXES $INDEXTYPE ==========================="
-   				$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$INDEXTYPE/backup $INDEXES_BACKUP_DIR |grep snapshot
+   				$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/backup $INDEXES_BACKUP_DIR |grep snapshot
    				if [ ${INDEXTYPE} == 'solr' ]; then
-  					$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$INDEXTYPE/config $INDEXES_DIR |grep snapshot
+  					$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/config $INDEXES_DIR |grep snapshot
 				fi
 				echo "DONE!"
 			;;
 			"db" )
 				echo "=========================== BACKUP VERIFICATION FOR DB $DBTYPE ==========================="    
-    			$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$DBTYPE $LOCAL_BACKUP_DB_DIR
+    			$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/db $LOCAL_BACKUP_DB_DIR
 				echo "DONE!"
 			;;
 			"cs" )
@@ -668,13 +664,13 @@ function verifyCommands (){
 			;;
 			* )
 				echo "=========================== BACKUP VERIFICATION FOR INDEXES $INDEXTYPE backup files ==========================="
-				$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$INDEXTYPE/backup $INDEXES_BACKUP_DIR |grep snapshot ; \
+				$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/backup $INDEXES_BACKUP_DIR |grep snapshot ; \
 				if [ ${INDEXTYPE} == 'solr' ]; then
 					echo "=========================== BACKUP VERIFICATION FOR INDEXES $INDEXTYPE config files ==========================="
-  					$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$INDEXTYPE/config $INDEXES_DIR |grep snapshot
+  					$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/config $INDEXES_DIR |grep snapshot
 				fi
 				echo "=========================== BACKUP VERIFICATION FOR DB $DBTYPE ==========================="; \
-	   			$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$DBTYPE $LOCAL_BACKUP_DB_DIR; \
+	   			$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/db $LOCAL_BACKUP_DB_DIR; \
 	   			echo "=========================== BACKUP VERIFICATION FOR CONTENTSTORE ==========================="; \
 				$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/cs $ALF_DIRROOT |grep contentstore; \
 				echo "=========================== BACKUP VERIFICATION FOR FILES ==========================="; \
@@ -690,13 +686,13 @@ function listCommands(){
 #		else
 		case $2 in
 			"index" )
-				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$INDEXTYPE/backup
+				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/backup
 				if [ ${INDEXTYPE} == 'solr' ]; then
-  					$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$INDEXTYPE/config
+  					$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/config
 				fi
 			;;
 			"db" )
-				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$DBTYPE
+				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/db
 			;;
 			"cs" )
 				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/cs
@@ -705,9 +701,9 @@ function listCommands(){
 				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/files 
 			;;
 			* )
-				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$INDEXTYPE/backup; \
-				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$INDEXTYPE/config; \
-				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$DBTYPE; \
+				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/backup; \
+				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/config; \
+				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/db; \
 				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/cs; \
 				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/files
 			;;
@@ -722,15 +718,15 @@ function collectionCommands () {
 		case $2 in
 			"index" )	
 				echo "======================= BACKUP COLLECTION FOR INDEXES $INDEXTYPE backup files ======================"
-    			$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$INDEXTYPE/backup
+    			$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/backup
     			if [ ${INDEXTYPE} == 'solr' ]; then
     				echo "======================= BACKUP COLLECTION FOR INDEXES $INDEXTYPE config files ======================"
-  					$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$INDEXTYPE/config
+  					$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/config
 				fi
 			;;
 			"db" )
 				echo "=========================== BACKUP COLLECTION FOR DB $DBTYPE =========================="
-    			$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$DBTYPE
+    			$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/db
 			;;
 			"cs" )
 				echo "========================== BACKUP COLLECTION FOR CONTENTSTORE ========================="
@@ -742,13 +738,13 @@ function collectionCommands () {
 			;;
 			* )
 				echo "======================= BACKUP COLLECTION FOR INDEXES $INDEXTYPE ======================"
-				$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$INDEXTYPE/backup; \ 
+				$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/backup; \ 
 				if [ ${INDEXTYPE} == 'solr' ]; then     
 					echo "======================= BACKUP COLLECTION FOR INDEXES $INDEXTYPE config files ======================";   
-					$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$INDEXTYPE/config; 
+					$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/config; 
 				fi
 				echo "=========================== BACKUP COLLECTION FOR DB $DBTYPE =========================="; \
-				$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/$DBTYPE; \
+				$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/db; \
 				echo "========================== BACKUP COLLECTION FOR CONTENTSTORE ========================="; \
 				$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/cs; \
 				echo "============================== BACKUP COLLECTION FOR FILES ============================"; \
@@ -765,37 +761,21 @@ function maintenanceCommands () {
 	# Run maintenance if required/enabled
 	if [ ${BACKUP_INDEX_ENABLED} == 'true' ]; then
 		## INDEX backup collection maintenance
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/$INDEXTYPE/backup" >> $ALFBRT_LOG_FILE
-  		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/$INDEXTYPE/backup >> $ALFBRT_LOG_FILE
-  		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/$INDEXTYPE/backup" >> $ALFBRT_LOG_FILE 2>&1
-  		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/$INDEXTYPE/backup >> $ALFBRT_LOG_FILE
+		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/index/backup" >> $ALFBRT_LOG_FILE
+  		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/index/backup >> $ALFBRT_LOG_FILE
+  		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/index/backup" >> $ALFBRT_LOG_FILE 2>&1
+  		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/index/backup >> $ALFBRT_LOG_FILE
   		if [ ${INDEXTYPE} == 'solr' ]; then
-  			$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/$INDEXTYPE/config >> $ALFBRT_LOG_FILE
-  			$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/$INDEXTYPE/config >> $ALFBRT_LOG_FILE
+  			$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/index/config >> $ALFBRT_LOG_FILE
+  			$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/index/config >> $ALFBRT_LOG_FILE
 		fi
 	fi
 	
 	if [ ${BACKUP_DB_ENABLED} == 'true' ]; then
-	case $DBTYPE in 
-		"mysql" ) 
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/$DBTYPE" >> $ALFBRT_LOG_FILE
-			$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/$DBTYPE >> $ALFBRT_LOG_FILE
-  			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/$DBTYPE" >> $ALFBRT_LOG_FILE 2>&1
-  			$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/$DBTYPE >> $ALFBRT_LOG_FILE
-		;; 
-		"postgresql" )
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/$DBTYPE" >> $ALFBRT_LOG_FILE
-			$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/$DBTYPE >> $ALFBRT_LOG_FILE
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/$DBTYPE" >> $ALFBRT_LOG_FILE 2>&1
-			$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/$DBTYPE >> $ALFBRT_LOG_FILE		
-		;; 		
-		"oracle" )
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/$DBTYPE" >> $ALFBRT_LOG_FILE
-  			$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/$DBTYPE >> $ALFBRT_LOG_FILE
-  			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/$DBTYPE" >> $ALFBRT_LOG_FILE 2>&1
-  			$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/$DBTYPE >> $ALFBRT_LOG_FILE
-		;;	
-	esac
+		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/db" >> $ALFBRT_LOG_FILE
+		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/db >> $ALFBRT_LOG_FILE
+		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/db" >> $ALFBRT_LOG_FILE 2>&1
+		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/db >> $ALFBRT_LOG_FILE
 	fi
 
 	if [ ${BACKUP_CONTENTSTORE_ENABLED} == 'true' ]; then
