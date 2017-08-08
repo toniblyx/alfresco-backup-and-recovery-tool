@@ -738,7 +738,7 @@ function collectionCommands () {
 			;;
 			* )
 				echo "======================= BACKUP COLLECTION FOR INDEXES $INDEXTYPE ======================"
-				$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/backup; \ 
+				$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/backup;
 				if [ ${INDEXTYPE} == 'solr' ]; then     
 					echo "======================= BACKUP COLLECTION FOR INDEXES $INDEXTYPE config files ======================";   
 					$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/config; 
