@@ -104,7 +104,7 @@ case $BACKUPTYPE in
 		DEST=file://${LOCAL_BACKUP_FOLDER}
 		PARAMS="${GLOBAL_DUPLICITY_PARMS} ${NOENCFLAG}"
 		;;
-	* ) echo "$LOG_DATE_LOG - [ERROR] Unknown BACKUP type <$BACKUPTYPE>, review your alfresco-backup.properties" >> $ALFBRT_LOG_FILE;; 
+	* ) echo "`date +%F-%X` - [ERROR] Unknown BACKUP type <$BACKUPTYPE>, review your alfresco-backup.properties" >> $ALFBRT_LOG_FILE;; 
 esac
 	
 # Checks if logs directory exist 
@@ -114,21 +114,23 @@ if [ ! -d $ALFBRT_LOG_DIR ]; then
 fi
 
 function indexBackup {
-	echo "$LOG_DATE_LOG - $BART_LOG_TAG Backing up the Alfresco indexes to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
-  	echo "$LOG_DATE_LOG - $BART_LOG_TAG Starting backup - Alfresco $INDEXTYPE indexes" >> $ALFBRT_LOG_FILE
+	echo >> $ALFBRT_LOG_FILE
+	echo "`date +%F-%X` - $BART_LOG_TAG Backing up the Alfresco indexes to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
+  	echo "`date +%F-%X` - $BART_LOG_TAG Starting backup - Alfresco $INDEXTYPE indexes" >> $ALFBRT_LOG_FILE
   	# Command for indexes backup
-	echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $INDEXES_BACKUP_DIR $DEST/$INDEXTYPE" >> $ALFBRT_LOG_FILE
+	echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $INDEXES_BACKUP_DIR $DEST/$INDEXTYPE" >> $ALFBRT_LOG_FILE
   	$DUPLICITYBIN $PARAMS $INDEXES_BACKUP_DIR $DEST/index/backup >> $ALFBRT_LOG_FILE
   	if [ ${INDEXTYPE} == 'solr' ]; then
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $INDEXES_DIR --exclude $INDEXES_DIR/archive --exclude $INDEXES_DIR/workspace $DEST/index/config" >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $INDEXES_DIR --exclude $INDEXES_DIR/archive --exclude $INDEXES_DIR/workspace $DEST/index/config" >> $ALFBRT_LOG_FILE
   		$DUPLICITYBIN $PARAMS $INDEXES_DIR --exclude $INDEXES_DIR/archive --exclude $INDEXES_DIR/workspace $DEST/index/config >> $ALFBRT_LOG_FILE
 	fi
-	echo "$LOG_DATE_LOG - $BART_LOG_TAG Indexes backup finished" >> $ALFBRT_LOG_FILE
+	echo "`date +%F-%X` - $BART_LOG_TAG Indexes backup finished" >> $ALFBRT_LOG_FILE
 }
 
 function dbBackup {
-	echo "$LOG_DATE_LOG - $BART_LOG_TAG Backing up the Alfresco db to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
-	echo "$LOG_DATE_LOG - $BART_LOG_TAG Starting backup - Alfresco $DBTYPE db" >> $ALFBRT_LOG_FILE
+	echo >> $ALFBRT_LOG_FILE
+	echo "`date +%F-%X` - $BART_LOG_TAG Backing up the Alfresco db to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
+	echo "`date +%F-%X` - $BART_LOG_TAG Starting backup - Alfresco $DBTYPE db" >> $ALFBRT_LOG_FILE
 	
 	if [ ! -d $ALFBRT_LOG_DIR ]; then
 		echo Script logs directory not found, add a valid directory in 'ALFBRT_LOG_DIR'. Bye.
@@ -141,53 +143,54 @@ function dbBackup {
 	
 	case $DBTYPE in 
 		"mysql" ) 
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Backing up the Alfresco DB to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
-  			echo "$LOG_DATE_LOG - $BART_LOG_TAG Starting backup - Alfresco $DBTYPE DB" >> $ALFBRT_LOG_FILE
+			echo "`date +%F-%X` - $BART_LOG_TAG Backing up the Alfresco DB to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
+  			echo "`date +%F-%X` - $BART_LOG_TAG Starting backup - Alfresco $DBTYPE DB" >> $ALFBRT_LOG_FILE
 			# Mysql dump
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $MYSQL_BINDIR/$MYSQLDUMP_BIN --single-transaction  -u $DBUSER -h $DBHOST -p$DBPASS $DBNAME | $GZIP -9 > $LOCAL_BACKUP_DB_DIR/$DBNAME.dump" >> $ALFBRT_LOG_FILE
+			echo "`date +%F-%X` - $BART_LOG_TAG Running command - $MYSQL_BINDIR/$MYSQLDUMP_BIN --single-transaction  -u $DBUSER -h $DBHOST -p$DBPASS $DBNAME | $GZIP -9 > $LOCAL_BACKUP_DB_DIR/$DBNAME.dump" >> $ALFBRT_LOG_FILE
 			$MYSQL_BINDIR/$MYSQLDUMP_BIN --single-transaction -u $DBUSER -h $DBHOST -p$DBPASS $DBNAME | $GZIP -9 > $LOCAL_BACKUP_DB_DIR/$DBNAME.dump
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db" >> $ALFBRT_LOG_FILE
+			echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db" >> $ALFBRT_LOG_FILE
   			$DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db >> $ALFBRT_LOG_FILE
-  			echo "$LOG_DATE_LOG - $BART_LOG_TAG cleaning DB backup" >> $ALFBRT_LOG_FILE
+  			echo "`date +%F-%X` - $BART_LOG_TAG cleaning DB backup" >> $ALFBRT_LOG_FILE
   			rm -fr $LOCAL_BACKUP_DB_DIR/$DBNAME.dump
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG DB backup finished" >> $ALFBRT_LOG_FILE
+			echo "`date +%F-%X` - $BART_LOG_TAG DB backup finished" >> $ALFBRT_LOG_FILE
 			
 		;; 
 		"postgresql" ) 		
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Backing up the Alfresco DB to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
-  			echo "$LOG_DATE_LOG - $BART_LOG_TAG Starting backup - Alfresco $DBTYPE DB" >> $ALFBRT_LOG_FILE
+			echo "`date +%F-%X` - $BART_LOG_TAG Backing up the Alfresco DB to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
+  			echo "`date +%F-%X` - $BART_LOG_TAG Starting backup - Alfresco $DBTYPE DB" >> $ALFBRT_LOG_FILE
 			# PG dump in plain text format and compressed 
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $PGSQL_BINDIR/$PGSQLDUMP_BIN -Fc -w -h $DBHOST -U $DBUSER $DBNAME > $LOCAL_BACKUP_DB_DIR/$DBNAME.sql.Fc" >> $ALFBRT_LOG_FILE
+			echo "`date +%F-%X` - $BART_LOG_TAG Running command - $PGSQL_BINDIR/$PGSQLDUMP_BIN -Fc -w -h $DBHOST -U $DBUSER $DBNAME > $LOCAL_BACKUP_DB_DIR/$DBNAME.sql.Fc" >> $ALFBRT_LOG_FILE
 			export PGPASSFILE=$PGPASSFILE
 			export PGPASSWORD=$DBPASS
 			$PGSQL_BINDIR/$PGSQLDUMP_BIN -Fc -w -h $DBHOST -U $DBUSER $DBNAME > $LOCAL_BACKUP_DB_DIR/$DBNAME.sql.Fc
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db" >> $ALFBRT_LOG_FILE
+			echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db" >> $ALFBRT_LOG_FILE
   			$DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db >> $ALFBRT_LOG_FILE
 		;; 
 		
 		"oracle" ) 
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Backing up the Alfresco DB to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
-  			echo "$LOG_DATE_LOG - $BART_LOG_TAG Starting backup - Alfresco $DBTYPE DB" >> $ALFBRT_LOG_FILE
+			echo "`date +%F-%X` - $BART_LOG_TAG Backing up the Alfresco DB to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
+  			echo "`date +%F-%X` - $BART_LOG_TAG Starting backup - Alfresco $DBTYPE DB" >> $ALFBRT_LOG_FILE
 			# Oracle export 
 			# TODO: Change full options
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $ORACLE_BINDIR/$ORASQLDUMP_BIN $DBUSER/$DBPASS@$DBHOST/$DBNAME full=y file=$LOCAL_BACKUP_DB_DIR/$DBNAME.dump log=$ALFBRT_LOG_FILE" >> $ALFBRT_LOG_FILE
+			echo "`date +%F-%X` - $BART_LOG_TAG Running command - $ORACLE_BINDIR/$ORASQLDUMP_BIN $DBUSER/$DBPASS@$DBHOST/$DBNAME full=y file=$LOCAL_BACKUP_DB_DIR/$DBNAME.dump log=$ALFBRT_LOG_FILE" >> $ALFBRT_LOG_FILE
 			$ORACLE_BINDIR/$ORASQLDUMP_BIN $DBUSER/$DBPASS@$DBHOST/$DBNAME full=y file=$LOCAL_BACKUP_DB_DIR/$DBNAME.dump log=$ALFBRT_LOG_FILE
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db" >> $ALFBRT_LOG_FILE
+			echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db" >> $ALFBRT_LOG_FILE
   			$DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db >> $ALFBRT_LOG_FILE
-  			echo "$LOG_DATE_LOG - $BART_LOG_TAG cleaning DB backup" >> $ALFBRT_LOG_FILE
+  			echo "`date +%F-%X` - $BART_LOG_TAG cleaning DB backup" >> $ALFBRT_LOG_FILE
   			rm -fr $LOCAL_BACKUP_DB_DIR/$DBNAME.dump
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG DB backup finished" >> $ALFBRT_LOG_FILE
+			echo "`date +%F-%X` - $BART_LOG_TAG DB backup finished" >> $ALFBRT_LOG_FILE
 		;;
 		
 		* ) 
-		echo "$LOG_DATE_LOG - [ERROR] Unknown DB type \"$DBTYPE\", review your alfresco-bart.properties. Backup ABORTED!" >> $ALFBRT_LOG_FILE
-		echo "$LOG_DATE_LOG - [ERROR] Unknown DB type \"$DBTYPE\", review your alfresco-bart.properties. Backup ABORTED!"	
+		echo "`date +%F-%X` - [ERROR] Unknown DB type \"$DBTYPE\", review your alfresco-bart.properties. Backup ABORTED!" >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - [ERROR] Unknown DB type \"$DBTYPE\", review your alfresco-bart.properties. Backup ABORTED!"	
 		exit 1
 		;; 
 	esac 
 }
 
 function contentStoreBackup {
+	echo >> $ALFBRT_LOG_FILE
 	# Getting a variable to know all includes and excludes
 	CONTENTSTORE_DIR_INCLUDES="--include $ALF_CONTENTSTORE"
 	if [ "$ALF_CONTENSTORE_DELETED" != "" ]; then
@@ -211,20 +214,21 @@ function contentStoreBackup {
 	
 	CONTENTSTORE_EXCLUDE_PARENT_DIR="$(dirname "$ALF_CONTENTSTORE")"
   	
-  	echo "$LOG_DATE_LOG - $BART_LOG_TAG Backing up the Alfresco ContentStore to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
-  	echo "$LOG_DATE_LOG - $BART_LOG_TAG Starting backup - Alfresco ContentStore" >> $ALFBRT_LOG_FILE
-  	echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $CONTENTSTORE_DIR_INCLUDES $CS_DIR_INCLUDE_DELETED $CS_DIR_INCLUDE_CACHED $CS_DIR_INCLUDE_CS2 $CS_DIR_INCLUDE_CS3 $CS_DIR_INCLUDE_CS4 $CS_DIR_INCLUDE_CS5 --exclude $CONTENTSTORE_EXCLUDE_PARENT_DIR $CONTENTSTORE_EXCLUDE_PARENT_DIR $DEST/cs" >> $ALFBRT_LOG_FILE
+  	echo "`date +%F-%X` - $BART_LOG_TAG Backing up the Alfresco ContentStore to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
+  	echo "`date +%F-%X` - $BART_LOG_TAG Starting backup - Alfresco ContentStore" >> $ALFBRT_LOG_FILE
+  	echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $CONTENTSTORE_DIR_INCLUDES $CS_DIR_INCLUDE_DELETED $CS_DIR_INCLUDE_CACHED $CS_DIR_INCLUDE_CS2 $CS_DIR_INCLUDE_CS3 $CS_DIR_INCLUDE_CS4 $CS_DIR_INCLUDE_CS5 --exclude $CONTENTSTORE_EXCLUDE_PARENT_DIR $CONTENTSTORE_EXCLUDE_PARENT_DIR $DEST/cs" >> $ALFBRT_LOG_FILE
  
  	# Content Store backup itself 
   	$DUPLICITYBIN $PARAMS $CONTENTSTORE_DIR_INCLUDES $CS_DIR_INCLUDE_DELETED $CS_DIR_INCLUDE_CACHED \
   	$CS_DIR_INCLUDE_CS2 $CS_DIR_INCLUDE_CS3 $CS_DIR_INCLUDE_CS4 $CS_DIR_INCLUDE_CS5 \
   	--exclude $CONTENTSTORE_EXCLUDE_PARENT_DIR $CONTENTSTORE_EXCLUDE_PARENT_DIR \
   	$DEST/cs >> $ALFBRT_LOG_FILE
-  	echo "$LOG_DATE_LOG - $BART_LOG_TAG ContentStore backup done!" >> $ALFBRT_LOG_FILE
+  	echo "`date +%F-%X` - $BART_LOG_TAG ContentStore backup done!" >> $ALFBRT_LOG_FILE
 }
 
 function filesBackup {
-    # Getting a variable to know all includes and excludes
+	echo >> $ALFBRT_LOG_FILE
+    	# Getting a variable to know all includes and excludes
 	FILES_DIR_INCLUDES="$ALF_INSTALLATION_DIR"
 	
 	if [ -d "$INDEXES_BACKUP_DIR" ]; then
@@ -258,16 +262,16 @@ function filesBackup {
 		OPT_LOCAL_BACKUP_DB_DIR=" --exclude **$LOCAL_BACKUP_DB_DIR**"
 	fi
 	
-  	echo "$LOG_DATE_LOG - $BART_LOG_TAG Backing up the Alfresco files to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
-  	echo "$LOG_DATE_LOG - $BART_LOG_TAG Starting backup - Alfresco files" >> $ALFBRT_LOG_FILE
-  	echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $FILES_DIR_INCLUDES $OPT_INDEXES_BACKUP_DIR $OPT_INDEXES_DIR $OPT_ALF_CONTENTSTORE $OPT_ALF_CONTENSTORE_DELETED $OPT_CACHED_CONTENTSTORE $OPT_ALF_CONTENTSTORE2 $OPT_ALF_CONTENTSTORE3 $OPT_ALF_CONTENTSTORE4 $OPT_ALF_CONTENTSTORE5 $OPT_LOCAL_BACKUP_DB_DIR $OPT_LOCAL_DB_DIR $DEST/files" >> $ALFBRT_LOG_FILE
+  	echo "`date +%F-%X` - $BART_LOG_TAG Backing up the Alfresco files to $BACKUPTYPE" >> $ALFBRT_LOG_FILE
+  	echo "`date +%F-%X` - $BART_LOG_TAG Starting backup - Alfresco files" >> $ALFBRT_LOG_FILE
+  	echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $FILES_DIR_INCLUDES $OPT_INDEXES_BACKUP_DIR $OPT_INDEXES_DIR $OPT_ALF_CONTENTSTORE $OPT_ALF_CONTENSTORE_DELETED $OPT_CACHED_CONTENTSTORE $OPT_ALF_CONTENTSTORE2 $OPT_ALF_CONTENTSTORE3 $OPT_ALF_CONTENTSTORE4 $OPT_ALF_CONTENTSTORE5 $OPT_LOCAL_BACKUP_DB_DIR $OPT_LOCAL_DB_DIR $DEST/files" >> $ALFBRT_LOG_FILE
  
  	# files backup itself 
   	$DUPLICITYBIN $PARAMS $FILES_DIR_INCLUDES $OPT_INDEXES_BACKUP_DIR $OPT_INDEXES_DIR \
   	$OPT_ALF_CONTENTSTORE $OPT_ALF_CONTENSTORE_DELETED $OPT_CACHED_CONTENTSTORE \
   	$OPT_ALF_CONTENTSTORE2 $OPT_ALF_CONTENTSTORE3 $OPT_ALF_CONTENTSTORE4 $OPT_ALF_CONTENTSTORE5 \
   	$OPT_LOCAL_BACKUP_DB_DIR $OPT_LOCAL_DB_DIR $DEST/files >> $ALFBRT_LOG_FILE
-  	echo "$LOG_DATE_LOG - $BART_LOG_TAG Files backup done!" >> $ALFBRT_LOG_FILE
+  	echo "`date +%F-%X` - $BART_LOG_TAG Files backup done!" >> $ALFBRT_LOG_FILE
 }
 
 function restoreOptions (){
@@ -289,11 +293,11 @@ function restoreIndexes (){
 	restoreOptions $1 $2 $3 $4
 	if [ ${BACKUP_INDEX_ENABLED} == 'true' ]; then
 		echo " =========== Starting restore INDEXES from $DEST/index to $RESTOREDIR/$INDEXTYPE ==========="
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/index/backup $RESTOREDIR/$INDEXTYPE/backup" >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/index/backup $RESTOREDIR/$INDEXTYPE/backup" >> $ALFBRT_LOG_FILE
 		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/index/backup $RESTOREDIR/$INDEXTYPE/backup
 		
 		if [ ${INDEXTYPE} == 'solr' ]; then
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/index/config $RESTOREDIR/$INDEXTYPE/config" >> $ALFBRT_LOG_FILE
+			echo "`date +%F-%X` - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/index/config $RESTOREDIR/$INDEXTYPE/config" >> $ALFBRT_LOG_FILE
 			$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/index/config $RESTOREDIR/$INDEXTYPE/config	
 		fi
 		echo ""
@@ -306,7 +310,7 @@ function restoreDb (){
 	restoreOptions $1 $2 $3 $4
 	if [ ${BACKUP_DB_ENABLED} == 'true' ]; then
 		echo " =========== Starting restore DB from $DEST/db to $RESTOREDIR/db==========="
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/db $RESTOREDIR/db" >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/db $RESTOREDIR/db" >> $ALFBRT_LOG_FILE
 		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/db $RESTOREDIR/db
 		if [ ${DBTYPE} == 'mysql' ]; then
 			mv $RESTOREDIR/db/$DBNAME.dump $RESTOREDIR/db/$DBNAME.dump.gz
@@ -332,7 +336,7 @@ function restoreContentStore (){
 	restoreOptions $1 $2 $3 $4
 	if [ ${BACKUP_CONTENTSTORE_ENABLED} == 'true' ]; then
 		echo " =========== Starting restore CONTENT STORE from $DEST/cs to $RESTOREDIR/cs ==========="
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/cs $RESTOREDIR/cs" >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/cs $RESTOREDIR/cs" >> $ALFBRT_LOG_FILE
 		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/cs $RESTOREDIR/cs
 		echo ""
 		echo "CONTENT STORE from $DEST/cs... DONE!"
@@ -346,7 +350,7 @@ function restoreFiles (){
 	restoreOptions $1 $2 $3 $4
 	if [ ${BACKUP_FILES_ENABLED} == 'true' ]; then
 		echo " =========== Starting restore FILES from $DEST/files to $RESTOREDIR/files ==========="
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/files $RESTOREDIR/files" >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/files $RESTOREDIR/files" >> $ALFBRT_LOG_FILE
 		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/files $RESTOREDIR/files
 		echo ""
 		echo "FILES from $DEST/files... DONE!"
@@ -593,13 +597,13 @@ function restoreWizard(){
 }			
 	
 function restoreMysqlAtPointInTime (){
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $DBNAME.dump $DEST/db /tmp/$DBNAME.dump.gz" >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $DBNAME.dump $DEST/db /tmp/$DBNAME.dump.gz" >> $ALFBRT_LOG_FILE
 		$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $DBNAME.dump $DEST/db /tmp/$DBNAME.dump.gz
 		$GZIP -d /tmp/$DBNAME.dump.gz
 		## TODO: Clean DB if its already populated
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Command: $REC_MYSQL_BIN -h $REC_MYHOST -u $REC_MYUSER -p$REC_MYPASS $REC_MYDBNAME < /tmp/$DBNAME.dump" >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG - Command: $REC_MYSQL_BIN -h $REC_MYHOST -u $REC_MYUSER -p$REC_MYPASS $REC_MYDBNAME < /tmp/$DBNAME.dump" >> $ALFBRT_LOG_FILE
 		$REC_MYSQL_BIN -h $REC_MYHOST -u $REC_MYUSER -p$REC_MYPASS $REC_MYDBNAME < /tmp/$DBNAME.dump >> $ALFBRT_LOG_FILE
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Recovery DB populated" >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG - Recovery DB populated" >> $ALFBRT_LOG_FILE
 }
 
 # Function to search a node URL based on a string in the node name, it shows a result and the user has to type the chosen node_id
@@ -619,14 +623,14 @@ function searchNodeUrlInMysql (){
 		echo "Node file format: $NODE_FORMAT"
 		echo ""
 		rm -fr /tmp/$DBNAME.dump
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Cleaning recovery DB..." >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG - Cleaning recovery DB..." >> $ALFBRT_LOG_FILE
 		echo ""
 		$REC_MYSQL_BIN -h $REC_MYHOST -u $REC_MYUSER -p$REC_MYPASS -D $REC_MYDBNAME -e "drop database $REC_MYDBNAME;"
 		$REC_MYSQL_BIN -h $REC_MYHOST -u $REC_MYUSER -p$REC_MYPASS -e "create database $REC_MYDBNAME;"
 }
 
 function restoreSelectedNode (){
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $NODE_URL $DEST/db /tmp/$NODE_FILE_NAME" >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $NODE_URL $DEST/db /tmp/$NODE_FILE_NAME" >> $ALFBRT_LOG_FILE
 		$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $NODE_URL $DEST/cs /tmp/$NODE_FILE_NAME
 		echo ""
 		echo "Whooooohooooo!!"
@@ -755,15 +759,16 @@ function collectionCommands () {
 }
     
 function maintenanceCommands () {
+	echo >> $ALFBRT_LOG_FILE	
 	# Function to apply backup policies
-	echo "$LOG_DATE_LOG - $BART_LOG_TAG Running maintenance commands" >> $ALFBRT_LOG_FILE
+	echo "`date +%F-%X` - $BART_LOG_TAG Running maintenance commands" >> $ALFBRT_LOG_FILE
 	
 	# Run maintenance if required/enabled
 	if [ ${BACKUP_INDEX_ENABLED} == 'true' ]; then
 		## INDEX backup collection maintenance
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/index/backup" >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/index/backup" >> $ALFBRT_LOG_FILE
   		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/index/backup >> $ALFBRT_LOG_FILE
-  		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/index/backup" >> $ALFBRT_LOG_FILE 2>&1
+  		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/index/backup" >> $ALFBRT_LOG_FILE 2>&1
   		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/index/backup >> $ALFBRT_LOG_FILE
   		if [ ${INDEXTYPE} == 'solr' ]; then
   			$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/index/config >> $ALFBRT_LOG_FILE
@@ -772,25 +777,25 @@ function maintenanceCommands () {
 	fi
 	
 	if [ ${BACKUP_DB_ENABLED} == 'true' ]; then
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/db" >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/db" >> $ALFBRT_LOG_FILE
 		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/db >> $ALFBRT_LOG_FILE
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/db" >> $ALFBRT_LOG_FILE 2>&1
+		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/db" >> $ALFBRT_LOG_FILE 2>&1
 		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/db >> $ALFBRT_LOG_FILE
 	fi
 
 	if [ ${BACKUP_CONTENTSTORE_ENABLED} == 'true' ]; then
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/cs" >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/cs" >> $ALFBRT_LOG_FILE
   		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/cs >> $ALFBRT_LOG_FILE 2>&1
-  		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/cs" >> $ALFBRT_LOG_FILE 2>&1
+  		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/cs" >> $ALFBRT_LOG_FILE 2>&1
   		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/cs >> $ALFBRT_LOG_FILE 2>&1
 	fi
 	if [ ${BACKUP_FILES_ENABLED} == 'true' ]; then
-		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/files" >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/files" >> $ALFBRT_LOG_FILE
   		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/files >> $ALFBRT_LOG_FILE 2>&1
-  		echo "$LOG_DATE_LOG - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/files" >> $ALFBRT_LOG_FILE 2>&1
+  		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/files" >> $ALFBRT_LOG_FILE 2>&1
   		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/files >> $ALFBRT_LOG_FILE 2>&1
 	fi 
-	echo "$LOG_DATE_LOG - $BART_LOG_TAG Maintenance commands DONE!" >> $ALFBRT_LOG_FILE
+	echo "`date +%F-%X` - $BART_LOG_TAG Maintenance commands DONE!" >> $ALFBRT_LOG_FILE
 }
 
 # Main options
@@ -828,8 +833,8 @@ case $1 in
 					;;
 				esac
 			
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Starting backup" >> $ALFBRT_LOG_FILE
-			echo "$LOG_DATE_LOG - $BART_LOG_TAG Set script varibles done" >> $ALFBRT_LOG_FILE
+			echo "`date +%F-%X` - $BART_LOG_TAG Starting backup" >> $ALFBRT_LOG_FILE
+			echo "`date +%F-%X` - $BART_LOG_TAG Set script variables done" >> $ALFBRT_LOG_FILE
 			# Run backup of indexes if enabled
 			if [ ${BACKUP_INDEX_ENABLED} == 'true' ]; then
 				indexBackup
