@@ -4,12 +4,15 @@ For description and changelog see README file.
 
 Alfresco BART needs Duplicity (Python backup tool). Install it or Alfresco BART won't work. Most Linux distributions have readymade Duplicity packages available. If you encounter errors using the distro's duplicity please double check if the version is outdated on http://duplicity.nongnu.org.
 
-Please try using the latest stable Duplicity version (0.6.21) from the Duplicity website before filing bug reports. If you install Duplicity from the website's tarball check next "Requirements" before:
--Python v2.4 or later
--librsync v0.9.6 or later
--GnuPG for encryption
--NcFTP version 3.1.9 or later
--Boto 1.6a or later
+Please try using the latest stable Duplicity version (0.6.26) from the Duplicity website before filing bug reports. If you install Duplicity from the website's tarball check next "Requirements" before:
+ -Python v2.6 or later
+ -librsync v0.9.6 or later
+ -GnuPG for encryption
+ -fasteners 0.14.1 or later for concurrency locking
+ -for scp/sftp -- python-paramiko and python-pycryptopp
+ -for ftp -- lftp version 3.7.15 or later
+ -Boto 2.0 or later for single-processing S3 or GCS access (default)
+ -Boto 2.1.1 or later for multi-processing S3 access
  
 Other Alfresco BART dependences are:
 -mysqldump for MySQL backup

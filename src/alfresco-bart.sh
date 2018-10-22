@@ -17,7 +17,7 @@
 #
 #########################################################################################
 # alfresco-bart: ALFRESCO BACKUP AND RECOVERY TOOL 
-# Version 0.2       
+# Version 0.3     
 #########################################################################################
 # ACTION REQUIRED:
 # CONFIGURE alfresco-bart in the alfresco-bart.properties file and ALFBRT_PATH

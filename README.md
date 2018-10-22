@@ -24,12 +24,23 @@ For install instructions see INSTALL file.
 	* added single file or directory recovery from the installation files.
 	* added "--allow-source-mismatch" in a force option if source hostname changes
 
+#### [Oct/22/18] v0.3 
+	* fixed S3 authentication
+    * fixed script fails when the "EXCLUDE" paths are not inside alf_dir
+    * fix for the missed ${NOENCFLAG} during restore
+    * PostgreSQL dump format changed
+    * folder destination changed for index and database to be fixed instead of based on the db type or index type
+    * fix for the "date" printed in the log that was not updated while the script was running
+    * added GLOBAL_DUPLICITY_CACHE_PARMS param in order to let the user configure where to keep the cache files
+    * added SCP_PORT param in order to let the user configure the SFTP/SCP port when it is not the default 22. Also included the new SFTP related parameters, with the backup type as sftp
+    * removed the "--extra-clean" parameter, as this can led to problems when the user needs to restore a backup
+
 ## ISSUES
 Please use Github issues for any comment, bug or new features
 https://github.com/toniblyx/alfresco-backup-and-recovery-tool/issues
 
 ## DESCRIPTION
-Alfresco BART is a backup and recovery tool for Alfresco ECM. Is a shell script tool based on Duplicity for Alfresco backups and restore from a local file system, FTP, SCP or Amazon S3 of all its components: indexes, data base, content store and all deployment and configuration files. It should runs in most Linux distributions, for Windows you may use Cygwin (non tested yet).
+Alfresco BART is a backup and recovery tool for Alfresco ECM. Is a shell script tool based on Duplicity for Alfresco backups and restore from a local file system, FTP, SCP, SFTP or Amazon S3 of all its components: indexes, data base, content store and all deployment and configuration files. It should runs in most Linux distributions, for Windows you may use Cygwin (non tested yet).
 
 Brief description of its features: full and incremental backups, backup policies, backup volume control, encryption with GPG, compression. Also it has a restore wizard with shortcuts for quick restore of some key components (alfresco-global.properties and more).
 
@@ -71,12 +82,12 @@ see CHANGELOG
     * restore alfresco-global.properties from a point in time
 
 #### Backup volume control:
-    * All backups collections are split in a volume size 25MB by default, this can help to store your backup in tapes or in order to upload to a FTP, SCP or S3 server.
+    * All backups collections are split in a volume size 25MB by default, this can help to store your backup in tapes or in order to upload to a FTP, SCP, SFTP or S3 server.
 
 #### Backup to different destinations:
     * Local filesystem 
     * Remote FTP or FTPS server
-    * SCP server (should have shared keys already configured, no authentication with user and password supported)
+    * SCP or SFTP server (should have shared keys already configured, no authentication with user and password supported)
     * Amazon S3 
 
 #### Encryption with GnuPG, all backup volumes are encrypted, this feature is configurable (enable or disable).
