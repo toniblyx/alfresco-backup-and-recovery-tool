@@ -105,7 +105,7 @@ case $BACKUPTYPE in
 		;;
 	"sftp" )
 		if [ "$SFTP_PORT" != "" ]; then
-			DEST=sftp://${SFTP_USER}@${SFTP_SERVER}:$SFTP_PORT}/${SFTP_FOLDER}
+			DEST=sftp://${SFTP_USER}@${SFTP_SERVER}:${SFTP_PORT}/${SFTP_FOLDER}
 		else
 			DEST=sftp://${SFTP_USER}@${SFTP_SERVER}/${SFTP_FOLDER}
 		fi
