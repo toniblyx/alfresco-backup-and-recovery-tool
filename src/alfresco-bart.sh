@@ -17,7 +17,7 @@
 #
 #########################################################################################
 # alfresco-bart: ALFRESCO BACKUP AND RECOVERY TOOL 
-# Version 0.2       
+# Version 0.3     
 #########################################################################################
 # ACTION REQUIRED:
 # CONFIGURE alfresco-bart in the alfresco-bart.properties file and ALFBRT_PATH
@@ -84,25 +84,37 @@ case $BACKUPTYPE in
 	        export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
                 export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
 		DEST=${S3FILESYSLOCATION}
-		PARAMS="${GLOBAL_DUPLICITY_PARMS} ${S3OPTIONS} ${NOENCFLAG}"
+		PARAMS="${GLOBAL_DUPLICITY_PARMS} ${GLOBAL_DUPLICITY_CACHE_PARMS} ${S3OPTIONS} ${NOENCFLAG}"
 		;;
 	"ftp" ) 
 		if [ ${FTPS_ENABLE} == 'false' ]; then
    			DEST=ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_SERVER}:${FTP_PORT}/${FTP_FOLDER}
-   			PARAMS="${GLOBAL_DUPLICITY_PARMS} ${NOENCFLAG}"
+   			PARAMS="${GLOBAL_DUPLICITY_PARMS} ${GLOBAL_DUPLICITY_CACHE_PARMS} ${NOENCFLAG}"
 		else
    			DEST=ftps://${FTP_USER}:${FTP_PASSWORD}@${FTP_SERVER}:${FTP_PORT}/${FTP_FOLDER}
-   			PARAMS="${GLOBAL_DUPLICITY_PARMS} ${NOENCFLAG}"
+   			PARAMS="${GLOBAL_DUPLICITY_PARMS} ${GLOBAL_DUPLICITY_CACHE_PARMS} ${NOENCFLAG}"
 		fi
 		;;	
 	"scp" )
-		DEST=scp://${SCP_USER}@${SCP_SERVER}/${SCP_FOLDER}
-		PARAMS="${GLOBAL_DUPLICITY_PARMS} ${NOENCFLAG}"
+		if [ "$SCP_PORT" != "" ]; then
+			DEST=scp://${SCP_USER}@${SCP_SERVER}:${SCP_PORT}/${SCP_FOLDER}
+		else
+			DEST=scp://${SCP_USER}@${SCP_SERVER}/${SCP_FOLDER}
+		fi
+		PARAMS="${GLOBAL_DUPLICITY_PARMS} ${GLOBAL_DUPLICITY_CACHE_PARMS} ${NOENCFLAG}"
+		;;
+	"sftp" )
+		if [ "$SFTP_PORT" != "" ]; then
+			DEST=sftp://${SFTP_USER}@${SFTP_SERVER}:${SFTP_PORT}/${SFTP_FOLDER}
+		else
+			DEST=sftp://${SFTP_USER}@${SFTP_SERVER}/${SFTP_FOLDER}
+		fi
+		PARAMS="${GLOBAL_DUPLICITY_PARMS} ${GLOBAL_DUPLICITY_CACHE_PARMS} ${NOENCFLAG}"
 		;;
 	"local" )
 		# command sintax is "file:///" but last / is coming from ${LOCAL_BACKUP_FOLDER} variable
 		DEST=file://${LOCAL_BACKUP_FOLDER}
-		PARAMS="${GLOBAL_DUPLICITY_PARMS} ${NOENCFLAG}"
+		PARAMS="${GLOBAL_DUPLICITY_PARMS} ${GLOBAL_DUPLICITY_CACHE_PARMS} ${NOENCFLAG}"
 		;;
 	* ) echo "`date +%F-%X` - [ERROR] Unknown BACKUP type <$BACKUPTYPE>, review your alfresco-backup.properties" >> $ALFBRT_LOG_FILE;; 
 esac
@@ -294,11 +306,11 @@ function restoreIndexes (){
 	if [ ${BACKUP_INDEX_ENABLED} == 'true' ]; then
 		echo " =========== Starting restore INDEXES from $DEST/index to $RESTOREDIR/$INDEXTYPE ==========="
 		echo "`date +%F-%X` - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/index/backup $RESTOREDIR/$INDEXTYPE/backup" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/index/backup $RESTOREDIR/$INDEXTYPE/backup
+		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/index/backup $RESTOREDIR/$INDEXTYPE/backup
 		
 		if [ ${INDEXTYPE} == 'solr' ]; then
 			echo "`date +%F-%X` - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/index/config $RESTOREDIR/$INDEXTYPE/config" >> $ALFBRT_LOG_FILE
-			$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/index/config $RESTOREDIR/$INDEXTYPE/config	
+			$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/index/config $RESTOREDIR/$INDEXTYPE/config	
 		fi
 		echo ""
 		echo "INDEXES from $DEST/index... DONE!"
@@ -311,7 +323,7 @@ function restoreDb (){
 	if [ ${BACKUP_DB_ENABLED} == 'true' ]; then
 		echo " =========== Starting restore DB from $DEST/db to $RESTOREDIR/db==========="
 		echo "`date +%F-%X` - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/db $RESTOREDIR/db" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/db $RESTOREDIR/db
+		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/db $RESTOREDIR/db
 		if [ ${DBTYPE} == 'mysql' ]; then
 			mv $RESTOREDIR/db/$DBNAME.dump $RESTOREDIR/db/$DBNAME.dump.gz
 			echo ""
@@ -337,7 +349,7 @@ function restoreContentStore (){
 	if [ ${BACKUP_CONTENTSTORE_ENABLED} == 'true' ]; then
 		echo " =========== Starting restore CONTENT STORE from $DEST/cs to $RESTOREDIR/cs ==========="
 		echo "`date +%F-%X` - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/cs $RESTOREDIR/cs" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/cs $RESTOREDIR/cs
+		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/cs $RESTOREDIR/cs
 		echo ""
 		echo "CONTENT STORE from $DEST/cs... DONE!"
 		echo ""
@@ -351,7 +363,7 @@ function restoreFiles (){
 	if [ ${BACKUP_FILES_ENABLED} == 'true' ]; then
 		echo " =========== Starting restore FILES from $DEST/files to $RESTOREDIR/files ==========="
 		echo "`date +%F-%X` - $BART_LOG_TAG - Recovery $RESTORE_TIME_FLAG $DEST/files $RESTOREDIR/files" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} $DEST/files $RESTOREDIR/files
+		$DUPLICITYBIN restore --restore-time $RESTORE_TIME ${NOENCFLAG} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/files $RESTOREDIR/files
 		echo ""
 		echo "FILES from $DEST/files... DONE!"
 		echo ""
@@ -548,7 +560,7 @@ function restoreWizard(){
     		read CONFIRMRESTORE
 			read -p " To start restoring your selected backup press ENTER or CTRL+C to exit"
 			echo ""
-			$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore tomcat/shared/classes/alfresco-global.properties $DEST/files $RESTOREDIR/alfresco-global.properties
+			$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} ${GLOBAL_DUPLICITY_CACHE_PARMS} --file-to-restore tomcat/shared/classes/alfresco-global.properties $DEST/files $RESTOREDIR/alfresco-global.properties
 		
 		;;
 
@@ -585,7 +597,7 @@ function restoreWizard(){
     		read CONFIRMRESTORE
 			read -p " To start restoring your selected backup press ENTER or CTRL+C to exit"
 			echo ""
-			$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $FILE_TO_RESTORE_PATH $DEST/files $RESTOREDIR/$FILE_TO_RESTORE
+			$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} ${GLOBAL_DUPLICITY_CACHE_PARMS} --file-to-restore $FILE_TO_RESTORE_PATH $DEST/files $RESTOREDIR/$FILE_TO_RESTORE
 		;;
   		q ) 
   			exit 0
@@ -597,8 +609,8 @@ function restoreWizard(){
 }			
 	
 function restoreMysqlAtPointInTime (){
-		echo "`date +%F-%X` - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $DBNAME.dump $DEST/db /tmp/$DBNAME.dump.gz" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $DBNAME.dump $DEST/db /tmp/$DBNAME.dump.gz
+		echo "`date +%F-%X` - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} ${GLOBAL_DUPLICITY_CACHE_PARMS} --file-to-restore $DBNAME.dump $DEST/db /tmp/$DBNAME.dump.gz" >> $ALFBRT_LOG_FILE
+		$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} ${GLOBAL_DUPLICITY_CACHE_PARMS} --file-to-restore $DBNAME.dump $DEST/db /tmp/$DBNAME.dump.gz
 		$GZIP -d /tmp/$DBNAME.dump.gz
 		## TODO: Clean DB if its already populated
 		echo "`date +%F-%X` - $BART_LOG_TAG - Command: $REC_MYSQL_BIN -h $REC_MYHOST -u $REC_MYUSER -p$REC_MYPASS $REC_MYDBNAME < /tmp/$DBNAME.dump" >> $ALFBRT_LOG_FILE
@@ -630,8 +642,8 @@ function searchNodeUrlInMysql (){
 }
 
 function restoreSelectedNode (){
-		echo "`date +%F-%X` - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $NODE_URL $DEST/db /tmp/$NODE_FILE_NAME" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} --file-to-restore $NODE_URL $DEST/cs /tmp/$NODE_FILE_NAME
+		echo "`date +%F-%X` - $BART_LOG_TAG - Command: $DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} ${GLOBAL_DUPLICITY_CACHE_PARMS} --file-to-restore $NODE_URL $DEST/db /tmp/$NODE_FILE_NAME" >> $ALFBRT_LOG_FILE
+		$DUPLICITYBIN restore --restore-time $RESTOREDATE ${NOENCFLAG} ${GLOBAL_DUPLICITY_CACHE_PARMS} --file-to-restore $NODE_URL $DEST/cs /tmp/$NODE_FILE_NAME
 		echo ""
 		echo "Whooooohooooo!!"
 		echo ""
@@ -645,40 +657,40 @@ function verifyCommands (){
 		case $2 in
 			"index" )	
 				echo "=========================== BACKUP VERIFICATION FOR INDEXES $INDEXTYPE ==========================="
-   				$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/backup $INDEXES_BACKUP_DIR |grep snapshot
+   				$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/index/backup $INDEXES_BACKUP_DIR |grep snapshot
    				if [ ${INDEXTYPE} == 'solr' ]; then
-  					$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/config $INDEXES_DIR |grep snapshot
+  					$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/index/config $INDEXES_DIR |grep snapshot
 				fi
 				echo "DONE!"
 			;;
 			"db" )
 				echo "=========================== BACKUP VERIFICATION FOR DB $DBTYPE ==========================="    
-    			$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/db $LOCAL_BACKUP_DB_DIR
+    			$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/db $LOCAL_BACKUP_DB_DIR
 				echo "DONE!"
 			;;
 			"cs" )
 				echo "=========================== BACKUP VERIFICATION FOR CONTENTSTORE ==========================="
-    			$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/cs $ALF_DIRROOT |grep contentstore
+    			$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/cs $ALF_DIRROOT |grep contentstore
 				echo "DONE!"
 			;;
 			"files" )
 				echo "=========================== BACKUP VERIFICATION FOR FILES ==========================="
-    			$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/files $ALF_INSTALLATION_DIR | grep -v "alf_data\/solr"|grep -v "alf_data\/alfresco-db-backup"|grep -v "alf_data\/contentstore"
+    			$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/files $ALF_INSTALLATION_DIR | grep -v "alf_data\/solr"|grep -v "alf_data\/alfresco-db-backup"|grep -v "alf_data\/contentstore"
     			echo "DONE!"
 			;;
 			* )
 				echo "=========================== BACKUP VERIFICATION FOR INDEXES $INDEXTYPE backup files ==========================="
-				$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/backup $INDEXES_BACKUP_DIR |grep snapshot ; \
+				$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/index/backup $INDEXES_BACKUP_DIR |grep snapshot ; \
 				if [ ${INDEXTYPE} == 'solr' ]; then
 					echo "=========================== BACKUP VERIFICATION FOR INDEXES $INDEXTYPE config files ==========================="
-  					$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/config $INDEXES_DIR |grep snapshot
+  					$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/index/config $INDEXES_DIR |grep snapshot
 				fi
 				echo "=========================== BACKUP VERIFICATION FOR DB $DBTYPE ==========================="; \
-	   			$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/db $LOCAL_BACKUP_DB_DIR; \
+	   			$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/db $LOCAL_BACKUP_DB_DIR; \
 	   			echo "=========================== BACKUP VERIFICATION FOR CONTENTSTORE ==========================="; \
-				$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/cs $ALF_DIRROOT |grep contentstore; \
+				$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/cs $ALF_DIRROOT |grep contentstore; \
 				echo "=========================== BACKUP VERIFICATION FOR FILES ==========================="; \
-				$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/files $ALF_INSTALLATION_DIR | grep -v "alf_data\/solr"|grep -v "alf_data\/alfresco-db-backup"|grep -v "alf_data\/contentstore"
+				$DUPLICITYBIN verify -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/files $ALF_INSTALLATION_DIR | grep -v "alf_data\/solr"|grep -v "alf_data\/alfresco-db-backup"|grep -v "alf_data\/contentstore"
 			;;
 		esac 
 #		fi
@@ -690,26 +702,26 @@ function listCommands(){
 #		else
 		case $2 in
 			"index" )
-				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/backup
+				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/index/backup
 				if [ ${INDEXTYPE} == 'solr' ]; then
-  					$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/config
+  					$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/index/config
 				fi
 			;;
 			"db" )
-				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/db
+				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/db
 			;;
 			"cs" )
-				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/cs
+				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/cs
 			;;
 			"files" )
-				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/files 
+				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/files 
 			;;
 			* )
-				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/backup; \
-				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/config; \
-				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/db; \
-				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/cs; \
-				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/files
+				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/index/backup; \
+				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/index/config; \
+				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/db; \
+				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/cs; \
+				$DUPLICITYBIN list-current-files -v${DUPLICITY_LOG_VERBOSITY} ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/files
 			;;
 		esac 
 #		fi
@@ -722,37 +734,37 @@ function collectionCommands () {
 		case $2 in
 			"index" )	
 				echo "======================= BACKUP COLLECTION FOR INDEXES $INDEXTYPE backup files ======================"
-    			$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/backup
+    			$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/index/backup
     			if [ ${INDEXTYPE} == 'solr' ]; then
     				echo "======================= BACKUP COLLECTION FOR INDEXES $INDEXTYPE config files ======================"
-  					$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/config
+  					$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/index/config
 				fi
 			;;
 			"db" )
 				echo "=========================== BACKUP COLLECTION FOR DB $DBTYPE =========================="
-    			$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/db
+    			$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/db
 			;;
 			"cs" )
 				echo "========================== BACKUP COLLECTION FOR CONTENTSTORE ========================="
-    			$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/cs
+    			$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/cs
 			;;
 			"files" )
 				echo "============================== BACKUP COLLECTION FOR FILES ============================"
-    			$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/files			
+    			$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/files
 			;;
 			* )
 				echo "======================= BACKUP COLLECTION FOR INDEXES $INDEXTYPE ======================"
-				$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/backup;
+				$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/index/backup;
 				if [ ${INDEXTYPE} == 'solr' ]; then     
 					echo "======================= BACKUP COLLECTION FOR INDEXES $INDEXTYPE config files ======================";   
-					$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/index/config; 
+					$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/index/config; 
 				fi
 				echo "=========================== BACKUP COLLECTION FOR DB $DBTYPE =========================="; \
-				$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/db; \
+				$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/db; \
 				echo "========================== BACKUP COLLECTION FOR CONTENTSTORE ========================="; \
-				$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/cs; \
+				$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/cs; \
 				echo "============================== BACKUP COLLECTION FOR FILES ============================"; \
-				$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} $DEST/files
+				$DUPLICITYBIN collection-status -v0 ${NOENCFLAG} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} $DEST/files
 			;;
 		esac 
 #		fi
@@ -766,34 +778,34 @@ function maintenanceCommands () {
 	# Run maintenance if required/enabled
 	if [ ${BACKUP_INDEX_ENABLED} == 'true' ]; then
 		## INDEX backup collection maintenance
-		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/index/backup" >> $ALFBRT_LOG_FILE
-  		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/index/backup >> $ALFBRT_LOG_FILE
-  		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/index/backup" >> $ALFBRT_LOG_FILE 2>&1
-  		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/index/backup >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/index/backup" >> $ALFBRT_LOG_FILE
+  		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/index/backup >> $ALFBRT_LOG_FILE
+  		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/index/backup" >> $ALFBRT_LOG_FILE 2>&1
+  		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/index/backup >> $ALFBRT_LOG_FILE
   		if [ ${INDEXTYPE} == 'solr' ]; then
-  			$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/index/config >> $ALFBRT_LOG_FILE
-  			$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/index/config >> $ALFBRT_LOG_FILE
+  			$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/index/config >> $ALFBRT_LOG_FILE
+  			$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/index/config >> $ALFBRT_LOG_FILE
 		fi
 	fi
 	
 	if [ ${BACKUP_DB_ENABLED} == 'true' ]; then
-		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/db" >> $ALFBRT_LOG_FILE
-		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/db >> $ALFBRT_LOG_FILE
-		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/db" >> $ALFBRT_LOG_FILE 2>&1
-		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/db >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/db" >> $ALFBRT_LOG_FILE
+		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/db >> $ALFBRT_LOG_FILE
+		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/db" >> $ALFBRT_LOG_FILE 2>&1
+		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/db >> $ALFBRT_LOG_FILE
 	fi
 
 	if [ ${BACKUP_CONTENTSTORE_ENABLED} == 'true' ]; then
-		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/cs" >> $ALFBRT_LOG_FILE
-  		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/cs >> $ALFBRT_LOG_FILE 2>&1
-  		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/cs" >> $ALFBRT_LOG_FILE 2>&1
-  		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/cs >> $ALFBRT_LOG_FILE 2>&1
+		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/cs" >> $ALFBRT_LOG_FILE
+  		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/cs >> $ALFBRT_LOG_FILE 2>&1
+  		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/cs" >> $ALFBRT_LOG_FILE 2>&1
+  		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/cs >> $ALFBRT_LOG_FILE 2>&1
 	fi
 	if [ ${BACKUP_FILES_ENABLED} == 'true' ]; then
-		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/files" >> $ALFBRT_LOG_FILE
-  		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force --extra-clean $DEST/files >> $ALFBRT_LOG_FILE 2>&1
-  		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/files" >> $ALFBRT_LOG_FILE 2>&1
-  		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} --force $DEST/files >> $ALFBRT_LOG_FILE 2>&1
+		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/files" >> $ALFBRT_LOG_FILE
+  		$DUPLICITYBIN remove-older-than $CLEAN_TIME -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/files >> $ALFBRT_LOG_FILE 2>&1
+  		echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN remove-all-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/files" >> $ALFBRT_LOG_FILE 2>&1
+  		$DUPLICITYBIN remove-all-inc-of-but-n-full $MAXFULL -v${DUPLICITY_LOG_VERBOSITY} --log-file=${ALFBRT_LOG_FILE} ${GLOBAL_DUPLICITY_CACHE_PARMS} --force $DEST/files >> $ALFBRT_LOG_FILE 2>&1
 	fi 
 	echo "`date +%F-%X` - $BART_LOG_TAG Maintenance commands DONE!" >> $ALFBRT_LOG_FILE
 }
