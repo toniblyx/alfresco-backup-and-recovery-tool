@@ -177,6 +177,9 @@ function dbBackup {
 			$PGSQL_BINDIR/$PGSQLDUMP_BIN -Fc -w -h $DBHOST -U $DBUSER $DBNAME > $LOCAL_BACKUP_DB_DIR/$DBNAME.sql.Fc
 			echo "`date +%F-%X` - $BART_LOG_TAG Running command - $DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db" >> $ALFBRT_LOG_FILE
   			$DUPLICITYBIN $PARAMS $LOCAL_BACKUP_DB_DIR $DEST/db >> $ALFBRT_LOG_FILE
+  			echo "`date +%F-%X` - $BART_LOG_TAG cleaning DB backup" >> $ALFBRT_LOG_FILE
+  			rm -fr $LOCAL_BACKUP_DB_DIR/$DBNAME.sql.Fc
+			echo "`date +%F-%X` - $BART_LOG_TAG DB backup finished" >> $ALFBRT_LOG_FILE
 		;; 
 		
 		"oracle" ) 
